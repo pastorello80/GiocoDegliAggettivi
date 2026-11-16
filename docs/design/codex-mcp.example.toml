@@ -1,0 +1,13 @@
+# ESEMPIO: questo file non è caricato automaticamente.
+# Sostituire il percorso con quello reale della CLI ufficiale.
+# Headless: nessuna finestra, si apre il progetto tramite gli strumenti MCP.
+[mcp_servers.figcraft]
+command = 'C:\Strumenti\FigCraft\figcraft-cli.exe'
+args = ['mcp']
+
+# Alternativa per vedere le modifiche nell'app:
+# 1. Avviare figcraft.exe --control 7979 e aprire il file .figcraft.
+# 2. Usare il blocco seguente al posto del precedente.
+# [mcp_servers.figcraft_live]
+# command = 'C:\Strumenti\FigCraft\figcraft-cli.exe'
+# args = ['mcp', '--attach', '7979']

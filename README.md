@@ -52,14 +52,15 @@ L'autore del gioco decide tutte le regole. La formula della classifica degli agg
 - [Rapporto per l'organizzatore](docs/RAPPORTO_ORGANIZZATORE.md)
 - [Rapporto PDF da condividere](output/report/Rapporto_Gioco_degli_Aggettivi.pdf)
 - [Dettagli e limiti del frontend](webapp/README.md)
+- [Template modificabile in FigCraft e guida MCP](docs/design/README.md)
 - [Valutazione iniziale con note sugli aggiornamenti](VALUTAZIONE_E_PIANO.md)
 
 ## Organizzazione dei file
 
 ```text
 webapp/          frontend e test
-docs/            decisioni e pianificazione
-scripts/         generazione del rapporto
+docs/            decisioni, pianificazione e template FigCraft in design/
+scripts/         generazione del rapporto e del template grafico
 output/report/   rapporto PDF
 ```
 
