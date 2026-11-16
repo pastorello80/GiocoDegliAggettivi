@@ -1,0 +1,40 @@
+# Track only project directories at the workspace root.
+# Private account material and future unrelated folders stay excluded by default.
+/*
+!/.gitignore
+!/README.md
+!/VALUTAZIONE_E_PIANO.md
+!/docs/
+!/scripts/
+!/webapp/
+!/output/
+!/.github/
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+
+# Dependencies, build output and local runtime data
+node_modules/
+dist/
+.wrangler/
+.sites/
+.sites-runtime/
+coverage/
+__pycache__/
+*.pyc
+*.local
+
+# Private preview metadata is not part of the Cloudflare project.
+/webapp/.openai/
+
+# Keep the report, not deployment archives or intermediate outputs.
+/output/*
+!/output/report/
+/output/report/*
+!/output/report/Rapporto_Gioco_degli_Aggettivi.pdf
