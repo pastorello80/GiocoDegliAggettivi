@@ -36,5 +36,8 @@ __pycache__/
 # Keep the report, not deployment archives or intermediate outputs.
 /output/*
 !/output/report/
+!/output/pdf/
+/output/pdf/*
+!/output/pdf/Roadmap_Gioco_degli_Aggettivi.pdf
 /output/report/*
 !/output/report/Rapporto_Gioco_degli_Aggettivi.pdf

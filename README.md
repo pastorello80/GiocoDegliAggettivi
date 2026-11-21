@@ -47,11 +47,14 @@ L'autore del gioco decide tutte le regole. La formula della classifica degli agg
 
 ## Documentazione
 
+- [Roadmap completa dello sviluppo e stato delle attività](docs/ROADMAP.md)
+- [Roadmap in PDF](output/pdf/Roadmap_Gioco_degli_Aggettivi.pdf)
 - [Piano aggiornato della webapp](docs/PIANO_WEBAPP.md)
 - [Procedura proposta per il piano B](docs/PIANO_B_WHATSAPP.md)
 - [Rapporto per l'organizzatore](docs/RAPPORTO_ORGANIZZATORE.md)
 - [Rapporto PDF da condividere](output/report/Rapporto_Gioco_degli_Aggettivi.pdf)
 - [Dettagli e limiti del frontend](webapp/README.md)
+- [Demo Cloudflare con email e password e verifiche di accesso](docs/ACCESSO_DEMO_PASSWORD.md)
 - [Template modificabile in FigCraft e guida MCP](docs/design/README.md)
 - [Valutazione iniziale con note sugli aggiornamenti](VALUTAZIONE_E_PIANO.md)
 

@@ -1,0 +1,91 @@
+{
+  "date": "2026-11-21",
+  "baselineRef": "ad3d1802278337db115cb64605b10d0553272784",
+  "environment": "React 19 in Happy DOM, isolated storage; not a real browser or layout engine",
+  "checks": [
+    {
+      "check": "Initial: five fields, booster options open per user preference, no selected booster",
+      "status": "pass"
+    },
+    {
+      "check": "Empty submission: error shown and focused, no dialog",
+      "status": "pass"
+    },
+    {
+      "check": "Five fields update the existing local draft format",
+      "status": "pass"
+    },
+    {
+      "check": "Estensore: ten fields and selected summary",
+      "status": "pass"
+    },
+    {
+      "check": "Collapse/reopen preserves all ten words and booster",
+      "status": "pass"
+    },
+    {
+      "check": "Reordering position 10 upwards changes order and follows focus",
+      "status": "pass"
+    },
+    {
+      "check": "5su10: ten words retained, one selected booster",
+      "status": "pass"
+    },
+    {
+      "check": "Ten-word summary includes ten ordered words and 5su10",
+      "status": "pass"
+    },
+    {
+      "check": "Confirm DEMO stores independent receipt without changing data format",
+      "status": "pass"
+    },
+    {
+      "check": "Closing confirmation restores focus to review action",
+      "status": "pass"
+    },
+    {
+      "check": "Later edits remain a draft and preserve the previous receipt",
+      "status": "pass"
+    },
+    {
+      "check": "Previous receipt shows original words and explains unconfirmed changes",
+      "status": "pass"
+    },
+    {
+      "check": "Cancel removal preserves ten active fields and booster",
+      "status": "pass"
+    },
+    {
+      "check": "Remove booster returns to five fields, retains hidden words and warns",
+      "status": "pass"
+    },
+    {
+      "check": "Jolly remains a five-word booster",
+      "status": "pass"
+    },
+    {
+      "check": "Top replaces Jolly and retains five words",
+      "status": "pass"
+    },
+    {
+      "check": "Wrong initial is rejected",
+      "status": "pass"
+    },
+    {
+      "check": "Duplicate is rejected",
+      "status": "pass"
+    },
+    {
+      "check": "Locution is rejected",
+      "status": "pass"
+    },
+    {
+      "check": "Five-word summary remains available after returning from ten",
+      "status": "pass"
+    },
+    {
+      "check": "Five-word confirmation replaces the receipt without deleting hidden draft words",
+      "status": "pass"
+    }
+  ]
+}

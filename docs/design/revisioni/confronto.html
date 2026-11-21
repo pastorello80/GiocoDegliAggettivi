@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Revisione DESIGN · Prima e dopo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; font: 16px/1.6 system-ui, sans-serif; color: #263c33; background: #f8f7f2; }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    p { max-width: 80ch; }
+    a { color: #244d3b; }
+    label { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 16px 12px 0; }
+    select { font: inherit; padding: 8px; max-width: 100%; color: inherit; background: #fffefa; border: 1px solid #697762; border-radius: 6px; }
+    .views { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+    figure { margin: 0; max-width: 100%; }
+    figcaption { font-weight: 600; margin: 12px 0; }
+    .frame { max-width: 100%; overflow: auto; border: 1px solid #697762; background: #fffefa; }
+    iframe { display: block; width: 390px; height: 844px; border: 0; }
+    :focus-visible { outline: 3px solid #b04429; outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <h1>Primo ciclo DESIGN · Prima e dopo</h1>
+  <p>Confronta la demo di partenza con la revisione di Proposta 2. Queste sono anteprime HTML statiche generate dai componenti, senza interazioni React. Non sono screenshot né attestano un collaudo visivo. Per compilare e confermare usa <a href="http://127.0.0.1:5173/" target="_blank" rel="noopener">la demo locale</a>.</p>
+  <label for="viewport">Larghezza della vista
+    <select id="viewport"><option value="360">Mobile · 360 px</option><option value="390" selected>Mobile · 390 px</option><option value="1440">Desktop · 1440 px</option></select>
+  </label>
+  <label for="state">Stato dopo la revisione
+    <select id="state">
+      <option value="dopo-turno-booster-aperti.html">Avvio · booster aperti</option>
+      <option value="dopo-turno-booster-chiusi.html">Booster chiusi</option>
+      <option value="dopo-turno-dieci-chiusi.html">Booster chiusi · Estensore selezionato</option>
+      <option value="dopo-turno-cinque-compilati.html">Cinque aggettivi compilati</option>
+      <option value="dopo-turno-dieci-aperti.html">Dieci aggettivi · 5su10</option>
+      <option value="dopo-riepilogo-dieci.html">Riepilogo · dieci aggettivi</option>
+      <option value="dopo-conferma-dieci.html">Conferma DEMO · dieci aggettivi</option>
+    </select>
+  </label>
+  <p>Per il desktop, scorri orizzontalmente nel riquadro se la finestra è più stretta di 1440 px. Le finestre di riepilogo sono rappresentazioni statiche: il comportamento modale va provato nella demo.</p>
+  <div class="views">
+    <figure><figcaption>Prima · demo di partenza</figcaption><div class="frame"><iframe title="Demo prima della revisione" src="prima-turno.html"></iframe></div></figure>
+    <figure><figcaption>Dopo · revisione DESIGN</figcaption><div class="frame"><iframe id="after" title="Demo dopo la revisione" src="dopo-turno-booster-aperti.html"></iframe></div></figure>
+  </div>
+  <script>
+    document.getElementById('viewport').addEventListener('change', event => {
+      for (const frame of document.querySelectorAll('iframe')) frame.style.width = event.target.value + 'px';
+    });
+    document.getElementById('state').addEventListener('change', event => {
+      document.getElementById('after').src = event.target.value;
+    });
+  </script>
+</body>
+</html>

@@ -31,9 +31,33 @@ npm run preview
 
 I font sono serviti dal progetto con le rispettive licenze OFL. Nessun font viene richiesto a Google durante l'utilizzo. Le immagini delle icone si generano durante la build dal file SVG originale.
 
+## Lavorare sul design con React Grab
+
+React Grab è incluso fra le dipendenze di sviluppo e si carica solo con
+`npm run dev`. Per iniziare, apri nel browser l'indirizzo mostrato da Vite.
+
+1. Porta il puntatore sull'elemento che vuoi modificare e premi **Ctrl+C**
+   (su Mac **Cmd+C**). Se necessario, tieni premuti i tasti finché compare
+   la selezione, poi fai clic sull'elemento da copiare.
+2. Incolla il contesto nella chat e descrivi il risultato desiderato, per esempio:
+   «Riduci lo spazio sopra questo titolo» oppure «Rendi richiudibile questo riquadro».
+3. Le modifiche al codice si vedono nell'anteprima mentre Vite è in esecuzione.
+
+Il contesto copiato identifica l'elemento e, quando disponibile, il componente
+React con la posizione nel sorgente. La selezione serve a indicare dove
+intervenire; la modifica viene eseguita nel progetto tramite la chat.
+Per uscire dalla selezione premi **Esc**. Per copiare normalmente il testo di
+un campo, selezionalo nel campo prima di usare Ctrl+C.
+
+React Grab non viene incluso nella build di produzione né nell'anteprima
+`npm run preview`. Il flusso usa copia e incolla, senza configurare un agente
+esterno o un collegamento automatico alla chat.
+
+Riferimento: [documentazione ufficiale React Grab](https://github.com/aidenybai/react-grab).
+
 ## Limiti della demo
 
-Non sono collegati autenticazione, database, invii all'organizzatore, notifiche o calcolo ufficiale. La navigazione nell'area amministrativa è liberamente disponibile nell'anteprima e non rappresenta un sistema di autorizzazione. Dati, nomi, punteggi, numero di iscritti e calendario sono dimostrativi.
+Non sono collegati accessi dei giocatori, database, invii all'organizzatore, notifiche o calcolo ufficiale. La protezione temporanea della demo con password è distinta dagli account del torneo. La navigazione nell'area amministrativa è liberamente disponibile dopo l'accesso alla demo e non rappresenta un sistema di autorizzazione. Dati, nomi, punteggi, numero di iscritti e calendario sono dimostrativi.
 
 La bozza e la conferma DEMO rimangono nel localStorage del browser, su quel dispositivo e per quell'origine. La data della conferma proviene dal dispositivo e non ha valore di ricevuta ufficiale. Il blocco alla scadenza sarà un controllo server nella fase successiva; la demo resta provabile anche dopo la data di esempio.
 
@@ -53,4 +77,19 @@ L'anteprima di sviluppo non registra il service worker; per provare installazion
 
 ## Pubblicazione
 
-`.openai/hosting.json` conserva l'identità Sites del progetto e la directory `dist`. Il sito viene mantenuto privato per il proprietario. La condivisione con il gruppo e il collaudo dell'installazione attraverso il relativo sistema di accesso andranno verificati prima del pilota.
+La demo di prova è pubblicata su Cloudflare Workers con email e password
+dedicate, senza richiedere al visitatore un account Cloudflare.
+Configurazione e verifiche sono nella [guida all'accesso della demo](../docs/ACCESSO_DEMO_PASSWORD.md).
+Il file `wrangler.demo-login.jsonc` identifica il Worker con protezione server;
+`wrangler.demo.jsonc` conserva invece la precedente demo Access, ora disattivata.
+
+Per compilare questa bozza usare `npm run build:demo`: la modalità `demo`
+disabilita registrazione del service worker e generazione della PWA offline.
+La normale `npm run build` continua a generare la PWA per lo sviluppo successivo.
+Non pubblicare una build ordinaria sul Worker con password. Dopo le verifiche,
+pubblicare con `npx --yes wrangler@4.166.0 deploy --config wrangler.demo-login.jsonc`.
+Il segreto `DEMO_CREDENTIALS_SHA256` deve essere già configurato nel Worker;
+non inserirlo nel sorgente o nelle variabili `VITE_`.
+
+`.openai/hosting.json` conserva separatamente l'identità della precedente
+demo Sites, mantenuta privata per il proprietario.

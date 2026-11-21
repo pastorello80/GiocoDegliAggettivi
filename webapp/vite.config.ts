@@ -2,10 +2,11 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     VitePWA({
+      disable: mode === 'demo',
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'icons/*.png', 'fonts/*.ttf'],
       manifest: {
@@ -32,4 +33,4 @@ export default defineConfig({
       },
     }),
   ],
-});
+}));

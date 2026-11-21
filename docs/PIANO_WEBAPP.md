@@ -1,6 +1,6 @@
 # Piano aggiornato per la webapp
 
-Aggiornamento del 16 novembre 2026. Questo documento aggiorna l'impostazione originaria con app Android/iOS descritta in `VALUTAZIONE_E_PIANO.md`.
+Aggiornamento del 17 novembre 2026. Questo documento aggiorna l'impostazione originaria con app Android/iOS descritta in `VALUTAZIONE_E_PIANO.md`. L'ordine completo dello sviluppo, lo stato delle attività e i criteri di completamento sono nella [roadmap](ROADMAP.md).
 
 ## Decisioni confermate
 
@@ -10,6 +10,7 @@ Aggiornamento del 16 novembre 2026. Questo documento aggiorna l'impostazione ori
 - Affidare ogni decisione sul regolamento al suo autore.
 - Definire la formula della classifica degli aggettivi prima di sviluppare il calcolo ufficiale.
 - Preparare un frontend dimostrativo per valutare la GUI mentre prosegue la definizione delle regole.
+- Implementare le notifiche push per apertura del turno, promemoria di scadenza e pubblicazione dei risultati, con consenso e preferenze dell'utente. Le push devono essere collaudate su Android e iPhone prima del torneo ufficiale; frequenza e destinatari dei promemoria restano da concordare.
 - Concentrare hosting, logica server e database nell'account Cloudflare: Workers per codice e file della webapp, D1 per i dati. Questa scelta sostituisce Cloudflare Pages più Supabase. Attivazione e collegamento sono ancora da svolgere.
 - Prevedere la raccolta di emergenza tramite messaggi WhatsApp privati all'organizzatore e il successivo caricamento amministrativo. Attivazione, scadenze e criteri di validità del piano B saranno definiti dall'autore del regolamento.
 
@@ -22,7 +23,7 @@ Aggiornamento del 16 novembre 2026. Questo documento aggiorna l'impostazione ori
 - Account e autorizzazioni applicative saranno implementati nel backend usando componenti di autenticazione consolidati e compatibili con Workers/D1. Non si assume che D1 fornisca da solo accessi e ruoli o che ogni giocatore debba acquistare un account Cloudflare.
 - La gestione amministrativa dell'infrastruttura rimane nel solo account Cloudflare. L'attuale anteprima privata Sites è distinta dall'ambiente definitivo, che non è ancora attivato.
 - Ricevute ufficiali e controllo delle scadenze sul server, mai sul telefono.
-- Web Push e possibili promemoria email in una fase successiva; gestione specifica dell'installazione su iPhone.
+- Web Push incluse nel percorso verso il torneo ufficiale, con sottoscrizioni per dispositivo, invii dal backend e gestione specifica di installazione e consenso su iPhone. I promemoria email restano un'opzione separata. Le notifiche non sostituiscono le scadenze visibili e i controlli del server.
 - L'invio email nativo Cloudflare è un'opzione da verificare sull'account e sul dominio: l'invio a destinatari arbitrari richiede Workers Paid; non si presume gratuito sul piano Free. Nel prototipo inviti e assistenza possono essere gestiti manualmente dall'organizzatore.
 
 React Native, Expo/EAS e i canali Apple/Google della valutazione iniziale sono alternative future e non fanno parte del percorso scelto. Nessun account store è necessario per distribuire direttamente questa PWA.
@@ -35,6 +36,8 @@ Non sono attivati accessi reali, ruoli, database, invii ufficiali, promemoria o 
 
 ## Prossime attività
 
+Il dettaglio operativo è nella [roadmap completa](ROADMAP.md). Le priorità sono:
+
 1. Far valutare all'organizzatore le schermate e il percorso di invio.
 2. Chiarire formula, pari merito, campione, extra, booster, bonus e altri casi del regolamento.
 3. Approvare esempi con risultati attesi prima di implementare i calcoli.
@@ -42,6 +45,8 @@ Non sono attivati accessi reali, ruoli, database, invii ufficiali, promemoria o 
 5. Attivare backend Workers, D1, autorizzazioni, ricevute, scadenze e ripristino.
 6. Implementare piano B, copia della giocata, inserimento e importazione amministrativa con controllo dei conflitti e audit.
 7. Integrare revisione, calcolo e pubblicazione dei risultati, includendo le giocate di emergenza approvate.
-8. Collaudare prima con 10-15 persone, poi con 50-100, confrontando i risultati con il metodo attuale e simulando un'interruzione del portale.
+8. Implementare notifiche push, preferenze, promemoria programmati e apertura del turno/risultato dalla notifica; collaudare installazione e ricezione su Android e iPhone reali.
+9. Implementare e simulare spareggi e chiusura della stagione.
+10. Collaudare prima con 10-15 persone, poi con 50-100, confrontando i risultati con il metodo attuale e simulando un'interruzione del portale, quindi preparare l'avvio e la manutenzione.
 
 Le stime temporali iniziali vanno aggiornate per questa architettura e per il tempo effettivamente disponibile. Workers e D1 consentono di partire a 0 euro entro i limiti Free, da verificare anche per tempo di elaborazione e quote delle query. Workers Paid parte da 5 USD/mese, oltre a imposte e consumi aggiuntivi, ed è da valutare con le prove o per attivare email native verso gli utenti. D1 offre ripristino Time Travel di 7 giorni su Free e 30 su Paid; sono previste anche esportazioni conservate fuori dal servizio. Dominio, sviluppo, manutenzione ed eventuali servizi opzionali sono separati. Nessun piano a pagamento è stato scelto. La procedura proposta è in `PIANO_B_WHATSAPP.md`; il rapporto per l'organizzatore è in `RAPPORTO_ORGANIZZATORE.md` e nella relativa versione PDF.

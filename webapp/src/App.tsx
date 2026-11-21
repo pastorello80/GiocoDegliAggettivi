@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, Clock3, Expand, FileCheck2, Flag, Home, Info, Layers, ListOrdered, Menu, Settings2, ShieldCheck, Smartphone, Sparkles, Star, Trophy, Users, WandSparkles, WifiOff, X, Zap } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, BookOpen, Check, CheckCheck, ChevronDown, ChevronRight, CircleHelp, Clock3, Expand, FileCheck2, Flag, Home, Info, Layers, ListOrdered, Menu, Settings2, ShieldCheck, Smartphone, Sparkles, Star, Trophy, Users, WandSparkles, WifiOff, X, Zap } from 'lucide-react';
 import { registerSW } from 'virtual:pwa-register';
 import { emptyDraft, moveWord, parseDraft, requiredWords, sameAsReceipt, STORAGE_KEY, validateWords } from './lib/game';
 import type { Booster, Draft, Receipt } from './lib/game';
@@ -31,10 +31,10 @@ const ranking = [
   { name: 'I sinonimi', initials: 'SI', points: 219, series: 'B', delta: '−1', color: 'yellow' },
 ];
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+function Modal({ title, onClose, children, className = '' }: { title: string; onClose: () => void; children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => { const dialog = ref.current; dialog?.showModal(); return () => { dialog?.close(); }; }, []);
-  return <dialog ref={ref} onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} aria-labelledby="dialog-title">
+  return <dialog ref={ref} className={className} onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} aria-labelledby="dialog-title">
     <div className="dialog-content"><button className="icon-button close-dialog" onClick={onClose} aria-label="Chiudi"><X size={21} /></button><h2 id="dialog-title">{title}</h2>{children}</div>
   </dialog>;
 }
@@ -48,7 +48,11 @@ export function App() {
   const [draft, setDraft] = useState<Draft>(readLocal);
   const [modal, setModal] = useState<ModalName>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [boostersOpen, setBoostersOpen] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+  const reviewButtonRef = useRef<HTMLButtonElement>(null);
+  const turnModalWasOpen = useRef(false);
   const [toast, setToast] = useState('');
   const [saved, setSaved] = useState(true);
   const [online, setOnline] = useState(navigator.onLine);
@@ -61,6 +65,7 @@ export function App() {
   const count = requiredWords(draft.booster);
   const completed = draft.words.slice(0, count).filter(w => w.trim()).length;
   const confirmed = sameAsReceipt(draft.words, draft.booster, draft.receipt);
+  const selectedBooster = boosters.find(b => b.id === draft.booster);
 
   useEffect(() => {
     const hash = () => { setPage(initialPage()); setMobileMenu(false); setError(null); };
@@ -73,7 +78,7 @@ export function App() {
     return () => { window.removeEventListener('hashchange', hash); window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOnline); window.removeEventListener('beforeinstallprompt', onInstall); window.removeEventListener('appinstalled', onInstalled); };
   }, []);
   useEffect(() => {
-    if (import.meta.env.PROD) {
+    if (import.meta.env.PROD && import.meta.env.MODE !== 'demo') {
       const update = registerSW({ onNeedRefresh() { setRefresh(() => () => update(true)); } });
     }
   }, []);
@@ -82,6 +87,11 @@ export function App() {
     catch { setSaved(false); }
   }, [draft]);
   useEffect(() => { if (!toast) return; const timer = setTimeout(() => setToast(''), 4500); return () => clearTimeout(timer); }, [toast]);
+  useEffect(() => { if (error) errorRef.current?.focus(); }, [error]);
+  useEffect(() => {
+    if (!modal && turnModalWasOpen.current && page === 'turno') reviewButtonRef.current?.focus();
+    turnModalWasOpen.current = modal === 'confirm' || modal === 'receipt';
+  }, [modal, page]);
 
   function go(next: Page) { location.hash = next; setPage(next); setMobileMenu(false); setError(null); window.scrollTo({ top: 0, behavior: 'instant' }); }
   async function install() {
@@ -101,8 +111,16 @@ export function App() {
   function review() {
     const problem = validateWords(draft.words, draft.booster);
     setError(problem);
+    if (problem) errorRef.current?.focus();
     if (!problem) setModal('confirm');
   }
+  function reorder(from: number, to: number) {
+    setDraft({ ...draft, words: moveWord(draft.words, from, to, count) });
+    setError(null);
+    setToast(`Aggettivo spostato dalla posizione ${from + 1} alla ${to + 1}.`);
+    document.getElementById(`word-${to}`)?.focus();
+  }
+  function closeTurnModal() { setModal(null); }
   function confirmDemo() {
     const receipt: Receipt = { id: `DEMO-${crypto.randomUUID().slice(0, 8).toUpperCase()}`, at: new Date().toISOString(), words: draft.words.slice(0, count).map(w => w.trim()), booster: draft.booster };
     setDraft({ ...draft, receipt }); setModal('receipt');
@@ -126,27 +144,59 @@ export function App() {
     {mobileMenu && <button className="menu-scrim" aria-label="Chiudi navigazione" onClick={() => setMobileMenu(false)} />}
     <div className="workspace">
       <header className="topbar"><div className="breadcrumb"><button className="icon-button mobile-menu" aria-label="Apri menu" aria-expanded={mobileMenu} onClick={() => setMobileMenu(true)}><Menu /></button><span>La stagione</span><ChevronRight size={14} /><strong>{page === 'admin' ? 'Amministrazione' : nav.find(n => n.id === page)?.label}</strong></div><button className="help-button" onClick={() => go('regole')}><CircleHelp size={18} /><span>Come funziona</span></button></header>
-      <main id="main" tabIndex={-1}>
+      <main id="main" className={page === 'turno' ? 'turn-page' : undefined} tabIndex={-1}>
         {!online && <div className="notice"><WifiOff size={18} /><span>Sei offline. Puoi continuare la bozza su questo dispositivo.</span></div>}
         {!saved && <div className="notice error"><Info size={18} />Il browser non permette di salvare la bozza. Non chiudere la pagina prima di copiarla.</div>}
         {refresh && !updateDismissed && <div className="notice"><Sparkles size={18} /><span>È disponibile una nuova versione. Salva la bozza prima di aggiornare.</span><button onClick={() => void refresh()}>Aggiorna</button><button className="icon-button" aria-label="Più tardi" onClick={() => setUpdateDismissed(true)}><X size={18} /></button></div>}
 
         {page === 'turno' && <>
-          <div className="page-heading"><div><div className="eyebrow"><span /> SI GIOCA CON LE PAROLE</div><h1>Il tuo prossimo<br /><em>colpo di genio.</em></h1><p>Una parola, una lettera. Trova gli aggettivi che ci uniscono.</p></div><div className="round-counter"><span>TURNO DI PROVA</span><strong>01 <small>/ 20</small></strong><div className="round-progress"><i /></div></div></div>
-          <div className="game-layout"><div className="play-column">
-            <section className="word-card" aria-label="Parola del turno"><div className="word-top"><span className="pill"><span className="live-dot" /> Turno dimostrativo</span><span className="word-number">N° 01</span></div><div className="word-content"><div><span className="word-label">LA PAROLA È</span><h2>DOCUMENTO</h2><p>Quali aggettivi gli stanno meglio?</p></div><div className="letter-tile"><span>INIZIANO CON</span><strong>C</strong><span>LA TUA LETTERA</span></div></div><div className="word-bottom"><Clock3 size={16} /><span>Scadenza di esempio: domenica 22 novembre, ore 12:00</span></div><span className="word-decoration" aria-hidden="true">Aa</span></section>
-            <section className="answers-card"><div className="section-header"><div><h2>Le tue parole</h2><p>Ordinale dalla più calzante alla meno calzante.</p></div><span className="count-tag">{completed} <span>/ {count}</span></span></div>
-              <form onSubmit={e => { e.preventDefault(); review(); }}><div className="answer-list">{draft.words.slice(0, count).map((word, index) => <div className={`answer-row ${word.trim() ? 'filled' : ''}`} key={index}><label htmlFor={`word-${index}`} className="answer-number">{String(index + 1).padStart(2, '0')}</label><input id={`word-${index}`} aria-label={`Aggettivo in posizione ${index + 1}`} autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={64} value={word} placeholder={index === 0 ? 'Il primo che ti viene in mente…' : 'Un altro aggettivo con la C…'} onChange={e => { const words = [...draft.words]; words[index] = e.target.value; setDraft({ ...draft, words }); setError(null); }} /><div className="order-buttons"><button type="button" aria-label={`Sposta aggettivo ${index + 1} in alto`} disabled={index === 0} onClick={() => setDraft({ ...draft, words: moveWord(draft.words, index, index - 1, count) })}><ArrowUp size={14} /></button><button type="button" aria-label={`Sposta aggettivo ${index + 1} in basso`} disabled={index === count - 1} onClick={() => setDraft({ ...draft, words: moveWord(draft.words, index, index + 1, count) })}><ArrowDown size={14} /></button></div></div>)}</div>
-              <div className="answer-hint"><ShieldCheck size={16} /><span>Nel gioco, le tue scelte restano riservate fino ai risultati.</span></div>
-              {error && <div className="form-error" role="alert"><Info size={17} />{error}</div>}
-              {draft.receipt && <button type="button" className={`receipt-strip ${confirmed ? '' : 'changed'}`} onClick={() => setModal('receipt')}><FileCheck2 size={18} /><span>{confirmed ? 'Prova confermata su questo dispositivo' : 'Hai modifiche successive alla prova confermata'}</span><ChevronRight size={17} /></button>}
-              <div className="form-footer"><span className="save-state"><CheckCheck size={16} />{saved ? 'Bozza salvata sul dispositivo' : 'Salvataggio non disponibile'}</span><button className="primary-button" type="submit">{confirmed ? 'Rivedi la prova' : 'Prova la giocata'}<ArrowRight size={18} /></button></div>
+          <div className="page-heading turn-heading"><div>
+            <div className="eyebrow">SI GIOCA CON LE PAROLE</div>
+            <h1>Il tuo prossimo<br className="desktop-only" /> <em>colpo di genio.</em></h1>
+            <p>Una parola, una lettera. Trova gli aggettivi che ci uniscono.</p>
+          </div><div className="round-counter desktop-only"><span>TURNO DI PROVA</span><strong>01 <small>/ 20</small></strong><div className="round-progress"><i /></div></div></div>
+          <div className="game-layout turn-layout">
+            <section className="word-card" aria-label="Parola del turno">
+              <div className="word-top"><span className="pill"><span className="live-dot desktop-only" />Turno dimostrativo</span><span className="word-number"><span className="desktop-only">N° 01</span><span className="mobile-only">Turno 01 / 20</span></span></div>
+              <div className="word-content"><div><span className="word-label">LA PAROLA È</span><h2>DOCUMENTO</h2><p>Quali aggettivi gli stanno meglio?</p></div><div className="letter-tile"><span className="desktop-only">INIZIANO CON</span><span className="mobile-only">LETTERA</span><strong>C</strong><span className="desktop-only">LA TUA LETTERA</span></div></div>
+              <div className="word-bottom"><Clock3 size={16} /><span>Scadenza di esempio · <time dateTime="2026-11-22T12:00:00+01:00">22 novembre, ore 12:00</time></span></div>
+              <span className="word-decoration desktop-only" aria-hidden="true">Aa</span>
+            </section>
+            <section className="answers-card" aria-labelledby="answers-title">
+              <div className="section-header"><div><h2 id="answers-title">Le tue parole</h2><p id="answer-instructions">Dalla più calzante alla meno calzante, tutte con la C.</p></div><span className="count-tag" aria-label={`${completed} aggettivi compilati su ${count}`}>{completed} <span>/ {count}</span></span></div>
+              <form id="turn-form" onSubmit={e => { e.preventDefault(); review(); }}>
+                <div className="answer-list">{draft.words.slice(0, count).map((word, index) => <div className={`answer-row ${word.trim() ? 'filled' : ''}`} key={index}>
+                  <label htmlFor={`word-${index}`} className="answer-number">{String(index + 1).padStart(2, '0')}</label>
+                  <input id={`word-${index}`} aria-label={`Aggettivo in posizione ${index + 1}`} aria-describedby="answer-instructions reorder-instructions" autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={64} value={word} placeholder={index === 0 ? 'Il primo che ti viene in mente…' : 'Un altro aggettivo con la C…'} onChange={e => { const words = [...draft.words]; words[index] = e.target.value; setDraft({ ...draft, words }); setError(null); }} />
+                  <div className="order-buttons"><button type="button" aria-label={`Sposta aggettivo ${index + 1} in alto`} disabled={index === 0} onClick={() => reorder(index, index - 1)}><ArrowUp size={16} /></button><button type="button" aria-label={`Sposta aggettivo ${index + 1} in basso`} disabled={index === count - 1} onClick={() => reorder(index, index + 1)}><ArrowDown size={16} /></button></div>
+                </div>)}</div>
+                <p id="reorder-instructions" className="answer-hint"><ListOrdered size={17} /><span>Usa le frecce per cambiare l’ordine.</span></p>
+                <div className="save-state" role="status"><CheckCheck size={17} />{saved ? 'Bozza salvata su questo dispositivo' : 'Salvataggio non disponibile'}</div>
               </form>
             </section>
-          </div><div className="right-column">
-            <section className="boosters-card"><div className="section-header"><div><div className="eyebrow small">UNA MARCIA IN PIÙ</div><h2>I tuoi booster <Zap size={19} /></h2></div><span className="tiny-tag">4 DA PROVARE</span></div><p className="section-intro">Scegline uno per questo turno.<br />Puoi anche tenerteli per dopo.</p><div className="booster-list">{boosters.map(b => <button key={b.id} className={`booster-row ${draft.booster === b.id ? 'selected' : ''}`} aria-pressed={draft.booster === b.id} onClick={() => chooseBooster(b.id)}><span className={`booster-icon ${b.color}`}><b.icon size={21} /></span><span className="booster-description"><strong>{b.name}<span>{b.tag}</span></strong><small>{b.text}</small></span><span className="booster-radio">{draft.booster === b.id && <Check size={13} />}</span></button>)}</div><div className="booster-note"><Info size={15} /><span>Uno per turno, una volta a stagione.<br />Da utilizzare entro il 15° turno.</span></div></section>
-            <section className="how-card"><span className="how-icon"><Sparkles size={23} /></span><h3>Non cercare la parola<br />più rara. Trova quella<br /><em>che pensano gli altri.</em></h3><p>I punti nascono dalle scelte del gruppo. È tutta una questione di affinità.</p><button className="text-button" onClick={() => go('regole')}>Ripassa le regole <ArrowRight size={16} /></button><span className="how-decoration" aria-hidden="true">“</span></section>
-          </div></div>
+            <section className="boosters-card" aria-labelledby="boosters-title">
+              <h2 id="boosters-title"><button type="button" className="booster-toggle" aria-expanded={boostersOpen} aria-controls="booster-options" onClick={() => setBoostersOpen(open => !open)}>
+                <span>I tuoi booster<span className="booster-toggle-action">{boostersOpen ? 'Chiudi opzioni' : 'Mostra opzioni'}</span></span><ChevronDown size={22} aria-hidden="true" />
+              </button></h2>
+              <p className={`booster-summary ${selectedBooster ? 'has-selection' : ''}`} role="status"><Zap size={17} /><span>{selectedBooster ? `${selectedBooster.name} selezionato · ${count} aggettivi` : 'Nessun booster selezionato · 5 aggettivi'}</span></p>
+              {!boostersOpen && <ul className="booster-icons" aria-label="I quattro booster">{boosters.map(b => <li key={b.id} className={draft.booster === b.id ? 'selected' : undefined} aria-label={`${b.name}${draft.booster === b.id ? ', selezionato' : ''}`}>
+                <span className={`booster-icon ${b.color}`}><b.icon size={22} aria-hidden="true" />{draft.booster === b.id && <span className="booster-icon-check" aria-hidden="true"><Check size={12} /></span>}</span><span className="booster-icon-name">{b.name}</span>
+              </li>)}</ul>}
+              <div id="booster-options" hidden={!boostersOpen}>
+                <p className="section-intro">Scegline uno per questo turno, oppure gioca senza.</p>
+                <div className="booster-list">{boosters.map(b => <button type="button" key={b.id} className={`booster-row ${draft.booster === b.id ? 'selected' : ''}`} aria-pressed={draft.booster === b.id} onClick={() => chooseBooster(b.id)}><span className={`booster-icon ${b.color}`}><b.icon size={21} /></span><span className="booster-description"><strong>{b.name}<span>{b.tag}</span></strong><small>{b.text}</small></span><span className="booster-radio" aria-hidden="true">{draft.booster === b.id && <Check size={13} />}</span></button>)}</div>
+                {selectedBooster && <button type="button" className="remove-booster" onClick={() => chooseBooster(draft.booster)}>Rimuovi {selectedBooster.name}</button>}
+                <div className="booster-note"><Info size={17} /><span>Uno per turno, una volta a stagione. Da utilizzare entro il 15° turno.</span></div>
+              </div>
+            </section>
+            <section className="turn-actions" aria-label="Riepilogo della prova">
+              {error && <div ref={errorRef} id="turn-error" className="form-error" role="alert" tabIndex={-1}><Info size={18} /><span>{error}</span><a href="#word-0" onClick={e => { e.preventDefault(); document.getElementById('word-0')?.focus(); }}>Torna ai campi</a></div>}
+              {draft.receipt && <button type="button" className={`receipt-strip ${confirmed ? '' : 'changed'}`} onClick={() => setModal('receipt')}><FileCheck2 size={18} /><span>{confirmed ? `Conferma DEMO ${saved ? 'salvata' : 'in memoria'} · Vedi la prova` : 'Bozza modificata dopo la conferma DEMO · Vedi la prova precedente'}</span><ChevronRight size={17} /></button>}
+              <div className="review-action"><div><strong>{completed} di {count} aggettivi compilati</strong><p>{selectedBooster ? `Booster: ${selectedBooster.name}` : 'Nessun booster'} · Puoi controllare tutto nel riepilogo.</p></div><button ref={reviewButtonRef} className="primary-button" type="submit" form="turn-form">{confirmed ? 'Rivedi la prova DEMO' : 'Rivedi la giocata'}</button></div>
+              <p className="local-note"><ShieldCheck size={17} /><span>È una demo: bozza e conferma restano su questo dispositivo. Non viene inviata alcuna giocata all’organizzatore.</span></p>
+            </section>
+            <section className="how-card"><span className="how-icon"><Sparkles size={23} /></span><h3>Non cercare la parola più rara.<br /><em>Trova quella che pensano gli altri.</em></h3><p>I punti nascono dalle scelte del gruppo. È tutta una questione di affinità.</p><button className="text-button" onClick={() => go('regole')}>Ripassa le regole</button><span className="how-decoration" aria-hidden="true">“</span></section>
+          </div>
           <div className="bottom-caption"><span className="small-flower" aria-hidden="true">✳</span><span>Le parole sono più belle quando diventano un gioco.</span><span>7ª EDIZIONE</span></div>
         </>}
 
@@ -169,8 +219,27 @@ export function App() {
     <nav className="mobile-bottom-nav" aria-label="Navigazione mobile">{nav.map(n => <button key={n.id} aria-current={page === n.id ? 'page' : undefined} className={page === n.id ? 'active' : ''} onClick={() => go(n.id)}><n.icon size={21} /><span>{n.id === 'turno' ? 'Turno' : n.id === 'storico' ? 'Giocate' : n.id === 'regole' ? 'Regole' : 'Classifica'}</span></button>)}</nav>
     {toast && <div className="toast" role="status"><Check size={18} />{toast}</div>}
     {modal === 'install' && <Modal title={installed ? 'Il gioco è sulla tua Home' : 'Il gioco, a portata di tocco.'} onClose={() => setModal(null)}>{installed ? <><p>Stai già usando la modalità app, senza la barra del browser.</p><button className="primary-button full" onClick={() => setModal(null)}>Torna a giocare <ArrowRight size={18} /></button></> : <><p>Aggiungi l’icona alla Home per aprire il gioco come un’app.</p><div className="segmented install-tabs"><button className={installPlatform === 'ios' ? 'selected' : ''} onClick={() => setInstallPlatform('ios')}>iPhone e iPad</button><button className={installPlatform === 'android' ? 'selected' : ''} onClick={() => setInstallPlatform('android')}>Android e computer</button></div><ol className="install-steps">{(installPlatform === 'ios' ? ['Apri questo indirizzo in Safari. Se sei dentro un’altra app, usa “Apri in Safari”.', 'Tocca Condividi nel menu di Safari.', 'Scegli “Aggiungi alla schermata Home”. Mantieni attivo “Apri come app web”, se presente.', 'Tocca Aggiungi, poi apri il gioco dalla nuova icona.'] : ['Apri questo indirizzo in Chrome o in un browser che supporta l’installazione.', 'Apri il menu del browser e scegli “Installa app” o “Aggiungi alla schermata Home”.', 'Conferma e apri il gioco dalla nuova icona.']).map((s, i) => <li key={s}><span>{i + 1}</span><p>{s}</p></li>)}</ol><p className="install-footnote">Puoi continuare a usare il gioco anche dal browser. Nella demo non vengono inviate notifiche.</p><button className="primary-button full" onClick={() => setModal(null)}>Continua dal browser <ArrowRight size={18} /></button></>}</Modal>}
-    {modal === 'confirm' && <Modal title="Un ultimo sguardo." onClose={() => setModal(null)}><p>Questa è una prova: resterà sul tuo dispositivo e non verrà inviata all’organizzatore.</p><div className="confirmation-word"><span>DOCUMENTO</span><strong>Lettera C</strong></div><ol className="confirmation-list">{draft.words.slice(0, count).map((w, i) => <li key={i}><span>{i + 1}</span>{w.trim()}</li>)}</ol><div className="confirmation-booster"><Zap size={18} />{draft.booster ? `Booster: ${boosters.find(b => b.id === draft.booster)?.name}` : 'Nessun booster selezionato'}</div><button className="primary-button full" onClick={confirmDemo}>Conferma la prova <Check size={18} /></button><button className="secondary-button full" onClick={() => setModal(null)}><ArrowLeft size={16} />Torna alle parole</button></Modal>}
-    {modal === 'receipt' && draft.receipt && <Modal title="Prova confermata." onClose={() => setModal(null)}><div className="success-icon"><CheckCheck size={33} /></div><p>Hai provato il percorso di invio. Le parole sono salvate solo su questo dispositivo.</p><dl className="receipt-details"><div><dt>Riferimento dimostrativo</dt><dd>{draft.receipt.id}</dd></div><div><dt>Orario del dispositivo</dt><dd>{timeLabel(draft.receipt.at)}</dd></div><div><dt>Aggettivi</dt><dd>{draft.receipt.words.length}</dd></div></dl><p className="install-footnote">Questa conferma non è una ricevuta ufficiale del torneo. Nel servizio definitivo sarà il server a registrare l’invio.</p><button className="primary-button full" onClick={() => { setModal(null); go('storico'); }}>Vedi la mia prova <ArrowRight size={18} /></button></Modal>}
+    {modal === 'confirm' && <Modal key="confirm" className="turn-dialog" title="Riepilogo della giocata." onClose={closeTurnModal}>
+      <p className="dialog-kicker">TURNO 01 · PROVA DEMO</p>
+      <div className="confirmation-word"><span>DOCUMENTO</span><strong>Lettera C</strong></div>
+      <ol className="confirmation-list">{draft.words.slice(0, count).map((w, i) => <li key={i}><span>{String(i + 1).padStart(2, '0')}</span><strong>{w.trim()}</strong></li>)}</ol>
+      <div className="confirmation-booster"><Zap size={18} />{selectedBooster ? `Booster: ${selectedBooster.name}` : 'Nessun booster selezionato'}</div>
+      <p className="local-note"><ShieldCheck size={17} /><span>Confermi solo una prova su questo dispositivo. Nessun invio all’organizzatore e nessuna ricevuta ufficiale.</span></p>
+      {draft.receipt && !confirmed && <p className="draft-notice">Questa bozza ha modifiche successive alla prova precedente. Confermandola aggiorni la conferma DEMO locale.</p>}
+      {!saved && <p className="draft-notice">Il salvataggio non è disponibile: la prova andrà persa chiudendo la pagina.</p>}
+      <div className="dialog-actions"><button className="primary-button full" onClick={confirmDemo}>Conferma la prova DEMO <Check size={18} /></button><button className="secondary-button full" onClick={closeTurnModal}>Torna alle parole</button></div>
+    </Modal>}
+    {modal === 'receipt' && draft.receipt && <Modal key="receipt" className="turn-dialog" title="Conferma DEMO." onClose={closeTurnModal}>
+      <p className="dialog-kicker">TURNO 01 · SOLO SU QUESTO DISPOSITIVO</p>
+      <p>{saved ? 'La prova confermata è salvata su questo dispositivo.' : 'La prova è in memoria: il browser non permette di salvarla.'} Puoi continuare a modificare la bozza.</p>
+      {!confirmed && <p className="draft-notice">Stai guardando la prova precedente. Le modifiche della bozza non sono ancora confermate.</p>}
+      <div className="confirmation-word"><span>DOCUMENTO</span><strong>Lettera C</strong></div>
+      <ol className="confirmation-list">{draft.receipt.words.map((w, i) => <li key={i}><span>{String(i + 1).padStart(2, '0')}</span><strong>{w}</strong></li>)}</ol>
+      <div className="confirmation-booster"><Zap size={18} />{draft.receipt.booster ? `Booster: ${boosters.find(b => b.id === draft.receipt!.booster)?.name}` : 'Nessun booster selezionato'}</div>
+      <dl className="receipt-details"><div><dt>Riferimento dimostrativo</dt><dd>{draft.receipt.id}</dd></div><div><dt>Orario del dispositivo</dt><dd>{timeLabel(draft.receipt.at)}</dd></div></dl>
+      <p className="local-note"><ShieldCheck size={17} /><span>Questa conferma non è una ricevuta ufficiale del torneo. Nel servizio definitivo sarà il server a registrare l’invio.</span></p>
+      <div className="dialog-actions"><button className="primary-button full" onClick={closeTurnModal}>Torna alla bozza</button><button className="secondary-button full" onClick={() => { setModal(null); go('storico'); }}>Vedi la mia prova nello storico</button></div>
+    </Modal>}
   </>;
 }
 

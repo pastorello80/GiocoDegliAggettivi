@@ -1,0 +1,24 @@
+{
+  "name": "gioco-aggettivi-demo-login",
+  "account_id": "39f3ad5fa00c8987477530436bf58801",
+  "main": "worker/demo-auth.mjs",
+  "compatibility_date": "2026-11-21",
+  "compatibility_flags": ["nodejs_compat"],
+  // Il Worker controlla le credenziali prima di servire qualsiasi risorsa.
+  // Senza DEMO_CREDENTIALS_SHA256 o gli altri binding risponde 503.
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "single-page-application"
+  },
+  "ratelimits": [
+    {
+      "name": "DEMO_LOGIN_LIMITER",
+      "namespace_id": "2026112101",
+      "simple": { "limit": 12, "period": 60 }
+    }
+  ]
+}

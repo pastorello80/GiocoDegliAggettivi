@@ -1,0 +1,13 @@
+{
+  "name": "gioco-aggettivi-demo",
+  "account_id": "39f3ad5fa00c8987477530436bf58801",
+  "compatibility_date": "2026-11-21",
+  // Vecchia demo con Cloudflare Access, sostituita dalla demo con password.
+  // Per il collegamento attuale usare wrangler.demo-login.jsonc.
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

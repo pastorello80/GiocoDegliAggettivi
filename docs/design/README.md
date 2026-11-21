@@ -2,6 +2,8 @@
 
 Questa cartella contiene la base modificabile del Gioco degli Aggettivi per
 [FigCraft di ArtCraft](https://getartcraft.com/apps/figcraft).
+Per il collegamento MCP già predisposto su questo PC, vedi
+[configurazione locale e avvio](SETUP_LOCALE_MCP.md).
 Il file è stato generato e riaperto con il motore ufficiale FigCraft 0.18.1.
 Le anteprime PNG sono state controllate visivamente. L’apertura nell’app grafica
 su questo PC non è stata verificata.
@@ -69,8 +71,9 @@ FigCraft comprende un server MCP ufficiale nella CLI, avviato con
 **attached** modifica il documento nell’app aperta, così puoi vedere il lavoro.
 È documentato dal [progetto ufficiale](https://github.com/storytold/figcraft/blob/v0.18.1/docs/mcp.md).
 La versione Portable Windows 0.18.1 contiene sia `figcraft.exe` sia
-`figcraft-cli.exe`. Nessun MCP FigCraft è stato configurato in Codex durante
-questa preparazione e non risultava un plugin FigCraft nel catalogo consultato.
+`figcraft-cli.exe`. Per il collegamento predisposto successivamente su questo PC
+vedi [configurazione locale](SETUP_LOCALE_MCP.md). Non risultava un plugin FigCraft
+nel catalogo consultato durante la preparazione del kit.
 
 Per configurare l’MCP in Codex usa i percorsi reali degli eseguibili. Questi sono
 esempi: `C:\Strumenti\FigCraft` va sostituito con la cartella scelta da te.
